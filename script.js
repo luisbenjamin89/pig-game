@@ -1,45 +1,89 @@
-/* inicializando el juego*/
-initApp()
-/*declarando variables */
-let cuenta = 0
-let cara
-const btnroll = document.querySelector('.btn--roll')
-const dado = document.querySelector('.dice')
-let current1 = document.getElementById('current--0')
-/*funcion para inciar el juego*/
-function initApp() {
-  let score = 0
-  const score1 = document.getElementById('score--0')
-  const score2 = document.getElementById('score--1')
-  score1.textContent = score
-  score2.textContent = score
+// seleccionar elementos del DOM
+
+const btnNew = document.querySelector('.btn--new')
+const btnRoll = document.querySelector('.btn--roll')
+const btnHold = document.querySelector('.btn--hold')
+const diceEl = document.querySelector('.dice')
+const score0El = document.querySelector('#score--0')
+const score1El = document.querySelector('#score--1')
+const current0El = document.querySelector('#current--0')
+const current1El = document.querySelector('#current--1')
+const player0El = document.querySelector('.player--0')
+const player1El = document.querySelector('.player--1')
+
+// const btnHold = document.getElementsByClassName('btn--hold')[0]
+
+let currentScore, scores, activePlayer
+
+const init = function () {
+  currentScore = 0
+  activePlayer = 0
+  scores = [0, 0]
+  // diceEl.classList.add('hidden')
+  diceEl.style.display = 'none'
+  score0El.textContent = 0
+  score1El.textContent = 0
+  current0El.textContent = 0
+  current1El.textContent = 0
+  player0El.classList.remove('player--winner')
+  player1El.classList.remove('player--winner')
+  player0El.classList.add('player--active')
+  player1El.classList.remove('player--winner')
 }
 
-/*funcionalidad de la aplicacion primer roll*/
+init()
 
-btnroll.addEventListener('click', () => {
-  cara = Math.floor(Math.random() * 6 + 1)
-  cuenta += cara
-  current1.textContent = cuenta
+console.log(btnNew, btnRoll, btnHold)
 
-  switch (cara) {
-    case 1:
-      dado.setAttribute('src', 'dice-1.png')
-      current1.textContent = 0
-      break
-    case 2:
-      dado.setAttribute('src', 'dice-2.png')
-      break
-    case 3:
-      dado.setAttribute('src', 'dice-3.png')
-      break
-    case 4:
-      dado.setAttribute('src', 'dice-4.png')
-      break
-    case 5:
-      dado.setAttribute('src', 'dice-5.png')
-      break
-    default:
-      dado.setAttribute('src', 'dice-6.png')
+btnRoll.addEventListener('click', () => {
+  // sacas un número del 1 al 6
+  const dice = Math.trunc(Math.random() * 6) + 1
+
+  // mostrar el dado
+  diceEl.style.display = 'block'
+  diceEl.src = `dice-${dice}.png`
+
+  if (dice === 1) {
+    switchtPlayer()
+  } else {
+    // sumar el dado al current score
+    currentScore += dice
+    // TODO: seleccionar de forma dinámica el textContent
+    document.querySelector(`#current--${activePlayer}`).textContent =
+      currentScore
+    // current0El.textContent = currentScore
   }
 })
+
+btnNew.addEventListener('click', init())
+
+btnHold.addEventListener('click', () => {
+  // añadir currentScore al totalScore del jugador activo
+  scores[activePlayer] += currentScore
+  document.querySelector(`#score--${activePlayer}`).textContent =
+    scores[activePlayer]
+  // vemos si finaliza la partida o cambiamos de jugador
+  if (scores[activePlayer] >= 10) {
+    // termina el juego, al jugador activo se le añade la clase winner
+    document
+      .querySelector(`.player--${activePlayer}`)
+      .classList.add('player--winner')
+    document
+      .querySelector(`.player--${activePlayer}`)
+      .classList.remove('player--active')
+    // ocultamos el dado
+    diceEl.style.display = 'none'
+  } else {
+    // cambiamos de jugador
+    switchtPlayer()
+  }
+})
+
+function switchtPlayer() {
+  document.querySelector(`#current--${activePlayer}`).textContent = 0
+  currentScore = 0
+  activePlayer = activePlayer === 0 ? 1 : 0
+  // más sencillo que con if-else
+  player0El.classList.toggle('player--active')
+  player1El.classList.toggle('player--active')
+}
